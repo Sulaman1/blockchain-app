@@ -5,12 +5,15 @@ import "./DaiToken.sol";
 import "./DappToken.sol";
 
 contract TokenFarm{
-    DaiToken daiToken;
-    DappToken dappToken;
+    string public name = "TokenFarm";
+
+    DaiToken public daiToken;
+    DappToken public dappToken;
     
     address[] public stackers;
-    mapping(address => uint) stackAmount;
-    mapping(address =>bool) hasStacked;
+    mapping(address => uint) public stackAmount;
+    mapping(address =>bool) public hasStacked;
+    mapping(address => bool) public isStacking;
 
     constructor(DaiToken _daiToken, DappToken _dappToken){
         daiToken = _daiToken;
@@ -19,16 +22,28 @@ contract TokenFarm{
 
     // Stacking
     function StackingToken(uint _value) public{
-        require(!hasStacked[msg.sender], 'You have already stacked amount');
+        require(_value > 0, 'Your amount cant be 0 or less');
+
+		daiToken.transferFrom(msg.sender, address(this), _value);
+		stackAmount[msg.sender] = stackAmount[msg.sender] + _value;
+
+		if(!hasStacked[msg.sender]){
+			stackers.push(msg.sender);
+		}
+		isStacking[msg.sender] = true;
+		hasStacked[msg.sender] = true;
+
+        // require(!hasStacked[msg.sender], 'You have already stacked amount');
         
-        stackAmount[msg.sender] += _value;
-        if(!hasStacked[msg.sender]){
-            stackers.push(msg.sender);
-        }
+        
+        // stackAmount[msg.sender] += _value;   
+        // if(!hasStacked[msg.sender]){
+        //     stackers.push(msg.sender);
+        // }
    
-        //Investor send DAI amount to LiquidityPool
-        daiToken.transferFrom(msg.sender, address(this), _value);
-        hasStacked[msg.sender] = true;
+        // //Investor send DAI amount to LiquidityPool
+        // daiToken.transferFrom(msg.sender, address(this), _value);
+        // hasStacked[msg.sender] = true;
     }
 
     // Unstaking
