@@ -3,7 +3,23 @@ import Web3 from 'web3';
 import DaiToken from '../abis/DaiToken.json';
 import DappToken from '../abis/DappToken.json';
 import TokenFarm from '../abis/TokenFarm.json';
+import BVideo from '../abis/BVideo.json';
 import './App.css';
+
+
+
+/* <script src="https://unpkg.com/ipfs-http-client/dist/index.min.js"></script>
+const ipfs = window.IpfsHttpClient({ host: 'localhost', port: 5001 }) */
+
+// const ipfsClient = require('ipfs-http-client')
+// const ipfsClient = await ipfsClient.create()
+// const ipfs = ipfsClient({ host: 'ipfs.infura.io', port:5001, protocol: 'https' });
+
+
+
+var ipfsAPI = require('ipfs-api')
+var ipfs = ipfsAPI({ host: 'ipfs.infura.io', port:5001, protocol: 'https' });
+
 
 class App extends Component {
 
@@ -19,6 +35,7 @@ class App extends Component {
     const network = await web3.eth.net.getNetworkType();
     const accounts = await web3.eth.getAccounts();
     this.setState({acc: accounts[0]});
+
     console.log("network: ", network);
     console.log(" accounts:", this.state.acc);
 
@@ -27,8 +44,28 @@ class App extends Component {
     const daiTokenData = await DaiToken.networks[networkId];
     const dappTokenData = await DappToken.networks[networkId];
     const tokenFarmData = await TokenFarm.networks[networkId];
-
+    const bVideoData = await BVideo.networks[networkId];
     
+
+    if(bVideoData){
+      const bVideo = new web3.eth.Contract(BVideo.abi, bVideoData.address);
+      this.setState({ bVideo });
+
+      let vCount = await bVideo.methods.vCount().call();
+      this.setState({ vCount });
+
+      for(var i=vCount; i>=1; i--){
+        let video = await bVideo.methods.videos(i).call();
+        this.setState({ videos: [...this.state.videos, video]})
+      }
+
+      const latest = await bVideo.methods.videos(vCount).call();
+      this.setState({
+        latestHash: latest.videoHash,
+        latestTitle: latest.title
+      })
+    }
+
     if(tokenFarmData){
       const tokenFarm = new web3.eth.Contract(TokenFarm.abi, tokenFarmData.address);      
       const s = await tokenFarm.methods.stackers[0];
@@ -105,6 +142,11 @@ class App extends Component {
     this.state = { 
       loading: true,
       acc: '',
+      buffer: null,
+      bVideo: {},
+      vCount: 0,
+      videos: [],
+
       value: '0',
       daiToken: {},
       daiTokenBal: '0',
@@ -114,11 +156,6 @@ class App extends Component {
       tokenFarmBal: '0'
     }
   }
-
-  // async stakeAmount(params) {
-  //   this.setState({ value: params.value })
-  //   tokenFarm.methods.StackingToken(this.state.value);
-  // }
 
   stackAmount = async (amount) => {
      this.setState({loading: true});
@@ -139,11 +176,59 @@ class App extends Component {
     })
   }
 
+  captureFile = event => {
+    event.preventDefault();
+
+    console.log("window: ",  window)
+    const file = event.target.files[0]
+    const reader = new window.FileReader()
+    reader.readAsArrayBuffer(file)
+
+    reader.onloadend = () => {
+      this.setState({ buffer: Buffer(reader.result) })
+      console.log('buffer: ', this.state.buffer)
+    }
+  }
+
+
+  submitToIPFS = title => {
+
+  }
+
   render() {
     
     return (
       <div className="container">
-        <h1>Hello, World!</h1>
+
+
+      <h1>IPFS File Submission...</h1>
+
+        <form onSubmit={(event)=>{
+          //this.submitToIPFS(this.input);
+        }}>
+          <input 
+            type="file"
+            accept=".mp4, .mkv .ogg .wmv"
+            onChange={this.captureFile}
+            style={{width: '250px'}}
+            />
+          
+          <input 
+            id="videoTitle"
+            type="text" 
+            className="form-control-sm"
+            placeholder="Title"
+            required
+            />
+          <button type="submit" className="btn btn-success">Submit To IPFS</button>
+        </form>
+
+
+
+
+
+
+        <h1>Liquidity Pool!!!</h1>
         <p>{this.state.acc}</p>
 
         <form onSubmit={(event) => {
