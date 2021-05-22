@@ -13,7 +13,7 @@ class App extends Component {
   }
 
   async LoadBlockchainData(){
-    debugger;
+    
     //const web3 = new Web3("HTTP://127.0.0.1:7545"); //|| Web3.givenProvider
     const web3 = window.web3;
     const network = await web3.eth.net.getNetworkType();
@@ -31,32 +31,54 @@ class App extends Component {
     
     if(tokenFarmData){
       const tokenFarm = new web3.eth.Contract(TokenFarm.abi, tokenFarmData.address);      
-      
-      this.setState({ tokenFarm: tokenFarm});
+      const s = await tokenFarm.methods.stackers[0];
+      console.log(s);
+      this.setState({ tokenFarm: tokenFarm}); 
       let tokenFarmBal = await tokenFarm.methods.stackAmount(this.state.acc).call();
-      console.log("TokenFarm Balance: ", tokenFarmBal.toString());
+      console.log("Acc TokenFarm Stack Balance: ", tokenFarmBal.toString());
       this.setState({ tokenFarmBal: tokenFarmBal.toString()});
+      
+      let tokenBal = await tokenFarm.methods.stackAmount(tokenFarm._address).call();
+      console.log("Token Stack Balance: ", tokenBal.toString());
     }
     else {
       window.alert('TokenFarm contract not deployed to detect network')
     }
     if(daiTokenData){
       const daiToken = new web3.eth.Contract(DaiToken.abi, daiTokenData.address);
-      console.log("Dai balanceOf: ", this.state.acc);
+      const tokenFarm = new web3.eth.Contract(DaiToken.abi, tokenFarmData.address);
+      
+      console.log("balanceOf: ", this.state.acc);
+
       this.setState({ daiToken: daiToken});
+
       let daiTokenBal = await daiToken.methods.balanceOf(this.state.acc).call();
       this.setState({daiTokenBal: daiTokenBal.toString()});
-      console.log("Dai Balance: ", daiTokenBal.toString());
+      console.log("Acc Dai Balance: ", daiTokenBal.toString());
+
+      let tokA = await tokenFarm._address;
+      console.log("token Add: ", tokA);
+      let tokenBal = await daiToken.methods.balanceOf(tokA).call();
+      console.log("token DAI balance: ", tokenBal);
     }
     else {
       window.alert('DaiToken contract not deployed to detect network')
     }
     if(dappTokenData){
       const dappToken = new web3.eth.Contract(DappToken.abi, dappTokenData.address);
+      const tokenFarm = new web3.eth.Contract(DaiToken.abi, tokenFarmData.address);
+
       this.setState({ dappToken: dappToken});
       let dappTokenBal = await dappToken.methods.balanceOf(this.state.acc).call();
       this.setState({ dappTokenBal: dappTokenBal.toString() });
       console.log("Dapp Balance: ", dappTokenBal.toString());
+
+      
+
+      let tokA = await tokenFarm._address;
+      console.log("token Add: ", tokA);
+      let tokenBal = await dappToken.methods.balanceOf(tokA).call();
+      console.log("token DAPP balance: ", tokenBal);
     }
     else {
       window.alert('DappToken contract not deployed to detect network')
@@ -65,6 +87,7 @@ class App extends Component {
   }
 
   async loadWeb3(){
+   
     if(window.ethereum){
       window.web3 = new Web3(window.ethereum)
       await window.ethereum.enable()
@@ -99,15 +122,21 @@ class App extends Component {
 
   stackAmount = async (amount) => {
      this.setState({loading: true});
-   
-     this.state.daiToken.methods.approve(this.state.tokenFarm._address, amount).send({from: this.state.acc}).on('transactionhash', (hash) => {
-       this.state.tokenFarm.methods.StackingToken(amount).send({from: this.state.acc}).on('transactionhash', (hash) => {
+     this.state.daiToken.methods.approve(this.state.tokenFarm._address, amount).send({from: this.state.acc}).on('transactionHash', (hash) => {
+       this.state.tokenFarm.methods.StackingToken(amount).send({from: this.state.acc}).on('transactionHash', (hash) => {
         this.setState({ loading: false });
       })
     })
     let tokenFarmBal = await this.state.tokenFarm.methods.stackAmount(this.state.acc).call();
-    console.log("TokenFarm Balance After Stacking: ", tokenFarmBal.toString());
     
+    console.log("TokenFarm Balance After Stacking: ", tokenFarmBal.toString());
+  }
+
+  unstackAmount = () => {
+    this.setState({loading: true});
+    this.state.tokenFarm.methods.UnStackingToken().send({from: this.state.acc}).on('transactionHash', (hash) => {
+      this.setState({loading: false});
+    })
   }
 
   render() {
@@ -136,7 +165,15 @@ class App extends Component {
           
           <button type="submit">Stake!</button>
         </form>
-
+        <button
+	     				type="submit"
+	     				className="btn btn-link btn-block btn-sm"
+	     				onClick={(event) => {
+	     					event.preventDefault()
+	     					this.unstackAmount()
+	     				}}>
+	     					UN-STAKE...
+	     			</button>
       </div>
     );
   }

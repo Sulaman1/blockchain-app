@@ -10,4 +10,5 @@ contract DaiToken is ERC20{
     function mint(address _to, uint _value) public{
         _mint(_to, _value);
     }
+    
 }

@@ -1,0 +1,179 @@
+{
+  "contractName": "Main",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/sulaman/check/blockchain-app/src/contracts/Main.sol\":\"Main\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/sulaman/check/blockchain-app/src/contracts/Main.sol\":{\"keccak256\":\"0xabff3e9b19a15a4e734cad993d282fa425e9334a19a60c1fab91a89bb5a719b2\",\"urls\":[\"bzz-raw://dbae7ca999dccfb8dbd10a6dbcc131fb434780c40029b93b441c5f492254acf0\",\"dweb:/ipfs/QmWJftrtvU9boTGDuLA52aGATmrX3BehhdQ2HcMUFxn784\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220eae1e760ada1456feb6ded9d08d09729dbd3fa945a0ec2fea6ee498bbc42f66d64736f6c63430008000033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220eae1e760ada1456feb6ded9d08d09729dbd3fa945a0ec2fea6ee498bbc42f66d64736f6c63430008000033",
+  "immutableReferences": {},
+  "sourceMap": "25:36:2:-:0;;;44:15;;;;;;;;;;25:36;;;;;;",
+  "deployedSourceMap": "25:36:2:-:0;;;;;",
+  "source": "pragma solidity ^0.8.0;\n\ncontract Main{\n    constructor(){}\n}",
+  "sourcePath": "/home/sulaman/check/blockchain-app/src/contracts/Main.sol",
+  "ast": {
+    "absolutePath": "/home/sulaman/check/blockchain-app/src/contracts/Main.sol",
+    "exportedSymbols": {
+      "Main": [
+        60
+      ]
+    },
+    "id": 61,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 55,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:2"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 60,
+        "linearizedBaseContracts": [
+          60
+        ],
+        "name": "Main",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 58,
+              "nodeType": "Block",
+              "src": "57:2:2",
+              "statements": []
+            },
+            "id": 59,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 56,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "55:2:2"
+            },
+            "returnParameters": {
+              "id": 57,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "57:0:2"
+            },
+            "scope": 60,
+            "src": "44:15:2",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 61,
+        "src": "25:36:2"
+      }
+    ],
+    "src": "0:61:2"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/sulaman/check/blockchain-app/src/contracts/Main.sol",
+    "exportedSymbols": {
+      "Main": [
+        60
+      ]
+    },
+    "id": 61,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 55,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:2"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 60,
+        "linearizedBaseContracts": [
+          60
+        ],
+        "name": "Main",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 58,
+              "nodeType": "Block",
+              "src": "57:2:2",
+              "statements": []
+            },
+            "id": 59,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 56,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "55:2:2"
+            },
+            "returnParameters": {
+              "id": 57,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "57:0:2"
+            },
+            "scope": 60,
+            "src": "44:15:2",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 61,
+        "src": "25:36:2"
+      }
+    ],
+    "src": "0:61:2"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.2.3",
+  "updatedAt": "2021-05-21T23:55:17.054Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

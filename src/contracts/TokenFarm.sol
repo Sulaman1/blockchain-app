@@ -15,6 +15,8 @@ contract TokenFarm{
     mapping(address =>bool) public hasStacked;
     mapping(address => bool) public isStacking;
 
+    event StackEvent(address sender, address stacker, uint value);
+
     constructor(DaiToken _daiToken, DappToken _dappToken){
         daiToken = _daiToken;
         dappToken = _dappToken;
@@ -32,7 +34,8 @@ contract TokenFarm{
 		}
 		isStacking[msg.sender] = true;
 		hasStacked[msg.sender] = true;
-
+        //dappToken.transfer(msg.sender, 30);
+        emit StackEvent(msg.sender, address(this), _value);
         // require(!hasStacked[msg.sender], 'You have already stacked amount');
         
         
@@ -49,20 +52,27 @@ contract TokenFarm{
     // Unstaking
     function UnStackingToken() public{
         require(hasStacked[msg.sender], '');
+       
         //msg.sender.transfer(stackAmount[msg.sender]);
         daiToken.transfer(msg.sender, stackAmount[msg.sender]);
         stackAmount[msg.sender] = 0;
         hasStacked[msg.sender] = false;
+
     }
     
     // EarnReward
-    function IssueToken() public{
-        for(uint i=0; i<stackers.length; i++){
-            address inv = stackers[i];
-            uint amount = stackAmount[msg.sender];
-            if(amount > 0){
-                dappToken.transfer(inv, amount);
-            }
-        }       
-    }
+    	function issueToken() public{
+		uint balance;
+		for(uint256 i = 0; i < stackers.length; i++){
+
+			address add;
+			add = stackers[i];
+
+			balance = stackAmount[add];
+			
+			if(balance > 0){
+				dappToken.transfer(add, balance);
+			}
+		}
+	}
 }
