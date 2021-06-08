@@ -54,16 +54,24 @@ class App extends Component {
       let vCount = await bVideo.methods.vCount().call();
       this.setState({ vCount });
 
-      for(var i=vCount; i>=1; i--){
+      for(var i=vCount-1; i>=1; i--){
         let video = await bVideo.methods.videos(i).call();
         this.setState({ videos: [...this.state.videos, video]})
       }
 
-      const latest = await bVideo.methods.videos(vCount).call();
+      console.log("vCOUNT: ", this.state.vCount);
+      console.log("VIDEOS: ", this.state.videos);      
+
+      let latest = await bVideo.methods.videos((vCount-1)).call();
+
+      console.log("LATEST: ", latest);
+      let latestHash = latest.videoHash;
+      let latestTitle = latest.title;
       this.setState({
-        latestHash: latest.videoHash,
-        latestTitle: latest.title
+        latestHash,
+        latestTitle
       })
+      console.log("LATEST HASH: ", this.state.latestHash);
     }
 
     if(tokenFarmData){
@@ -85,7 +93,7 @@ class App extends Component {
       const daiToken = new web3.eth.Contract(DaiToken.abi, daiTokenData.address);
       const tokenFarm = new web3.eth.Contract(DaiToken.abi, tokenFarmData.address);
       
-      console.log("balanceOf: ", this.state.acc);
+      console.log("User Account: ", this.state.acc);
 
       this.setState({ daiToken: daiToken});
 
@@ -94,9 +102,9 @@ class App extends Component {
       console.log("Acc Dai Balance: ", daiTokenBal.toString());
 
       let tokA = await tokenFarm._address;
-      console.log("token Add: ", tokA);
+      console.log("token Address: ", tokA);
       let tokenBal = await daiToken.methods.balanceOf(tokA).call();
-      console.log("token DAI balance: ", tokenBal);
+      console.log("Token Contract DAI balance: ", tokenBal);
     }
     else {
       window.alert('DaiToken contract not deployed to detect network')
@@ -133,7 +141,7 @@ class App extends Component {
       window.web3 = new Web3(window.web3.currentProvider)
     }
     else{
-      window.alert('Non-Ethereum browser detected. You should trying MetaMask!')
+      window.alert('Non-Ethereum browser detected Or change to ganache Network. You should trying MetaMask!')
     }
   }
 
@@ -146,6 +154,10 @@ class App extends Component {
       bVideo: {},
       vCount: 0,
       videos: [],
+      latestHash: '',
+      latestTitle: '',
+      currentHash: '',
+      currentTitle: '',
 
       value: '0',
       daiToken: {},
@@ -179,7 +191,8 @@ class App extends Component {
   captureFile = event => {
     event.preventDefault();
 
-    console.log("window: ",  window)
+    console.log("WINDOW: ",  window)
+    console.log("EVENT.TARGET: ", event.target);
     const file = event.target.files[0]
     const reader = new window.FileReader()
     reader.readAsArrayBuffer(file)
@@ -189,10 +202,37 @@ class App extends Component {
       console.log('buffer: ', this.state.buffer)
     }
   }
-
+//QmRXiiSNYfJbW7Pw3Uw53hnEsqQRJvwN47wmm7gyNsab4o
+//"QmcRc3N1JqDKHWgBv1eLfQRcNAEM5HRLZLs92CbGKzP9sH"
 
   submitToIPFS = title => {
+    console.log("Submitting to IPFS: ", title)
 
+    this.setState({ loading: true})
+    ipfs.add(this.state.buffer, (error, result) => {
+      console.log("Result: ", result);
+      if(error){
+        console.error(error);
+        return;
+      }
+
+      this.state.bVideo.methods.videoUpload(result[0].hash, title).send({ from: this.state.acc }).on("transactionHash", (hash) => {
+        this.setState({ loading: false }) 
+      })
+    })
+  }
+
+  changeVideo = (hash, title)=> {
+    debugger;
+    let currentHash = hash;
+    let currentTitle = title;
+    
+    this.setState({ latestHash: hash })
+    this.setState({ latestTitle: title })
+    // this.setState({ currentHash });
+    // this.setState({ currentTitle });
+    // console.log(this.state.currentHash)
+     console.log(this.state.currentTitle)
   }
 
   render() {
@@ -200,28 +240,71 @@ class App extends Component {
     return (
       <div className="container">
 
+      <div class="container-fluid text-monospace">
+      <br/><br/>
+      &nbsp;
+      <br/><br/>
+        <div className="row">
+          <div className="col-md-10">
+            <div className="embed-responsive embed-responsive-16by9" style={{ maxHeight: '768px' }}>
+              <p>{this.state.latestHash}</p>
+              <video
+                src={'https://ipfs.infura.io/ipfs/'+this.state.latestHash}
+                controls
+              >
+              </video>
+            </div>
+            <h3><b><i>{this.state.latestTitle}</i></b></h3>
+          </div>
+          <div className="col-md-2">
 
-      <h1>IPFS File Submission...</h1>
+          <h1>IPFS File Submission...</h1>
+            <form onSubmit={(event)=>{
+              event.preventDefault();
+              const title = this.videoTitle.value;
+              this.submitToIPFS(title);
+            }}>
+              <input 
+                type="file"
+                accept=".mp4, .mkv .ogg .wmv"
+                onChange={this.captureFile}
+                style={{width: '250px'}}
+                />
+              
+              <input 
+                id="videoTitle"
+                type="text" 
+                className="form-control-sm"
+                ref={(input) => { this.videoTitle = input}}
+                placeholder="Title"
+                required
+                />
+              <button type="submit" className="btn btn-success">Submit To IPFS</button>
+            </form> 
 
-        <form onSubmit={(event)=>{
-          //this.submitToIPFS(this.input);
-        }}>
-          <input 
-            type="file"
-            accept=".mp4, .mkv .ogg .wmv"
-            onChange={this.captureFile}
-            style={{width: '250px'}}
-            />
-          
-          <input 
-            id="videoTitle"
-            type="text" 
-            className="form-control-sm"
-            placeholder="Title"
-            required
-            />
-          <button type="submit" className="btn btn-success">Submit To IPFS</button>
-        </form>
+            {this.state.videos.map((video, key)=>{
+              return(
+                <div className="card mb-4 text-center bg-secondory mx-auto" style={{ width: '175px'}}>
+                  <div className="card-title bg-dark">
+                    <small className="text-white"><a>{video.title}</a></small>
+                  </div>
+                  <div>
+                
+                    <p onClick={()=> this.changeVideo(video.videoHash, video.title)}>
+                      <video
+                       src={'https://ipfs.infura.io/ipfs/'+video.videoHash}
+                       
+                       style={{width: '150px'}}
+                      />
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+      </div>
 
 
 

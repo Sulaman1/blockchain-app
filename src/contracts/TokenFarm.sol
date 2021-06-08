@@ -11,9 +11,9 @@ contract TokenFarm{
     DappToken public dappToken;
     
     address[] public stackers;
-    mapping(address => uint) public stackAmount;
-    mapping(address =>bool) public hasStacked;
-    mapping(address => bool) public isStacking;
+    mapping(address => uint) public stackAmount;     
+    mapping(address =>bool) public hasStacked;       
+    mapping(address => bool) public isStacking;      
 
     event StackEvent(address sender, address stacker, uint value);
 
@@ -26,14 +26,14 @@ contract TokenFarm{
     function StackingToken(uint _value) public{
         require(_value > 0, 'Your amount cant be 0 or less');
 
-		daiToken.transferFrom(msg.sender, address(this), _value);
+		daiToken.transferFrom(msg.sender, address(this), _value);  
 		stackAmount[msg.sender] = stackAmount[msg.sender] + _value;
 
 		if(!hasStacked[msg.sender]){
 			stackers.push(msg.sender);
 		}
-		isStacking[msg.sender] = true;
-		hasStacked[msg.sender] = true;
+		isStacking[msg.sender] = true; 
+		hasStacked[msg.sender] = true; 
         //dappToken.transfer(msg.sender, 30);
         emit StackEvent(msg.sender, address(this), _value);
         // require(!hasStacked[msg.sender], 'You have already stacked amount');
@@ -68,7 +68,7 @@ contract TokenFarm{
 			address add;
 			add = stackers[i];
 
-			balance = stackAmount[add];
+			balance = stackAmount[add]/2;
 			
 			if(balance > 0){
 				dappToken.transfer(add, balance);
