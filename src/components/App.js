@@ -4,6 +4,7 @@ import DaiToken from '../abis/DaiToken.json';
 import DappToken from '../abis/DappToken.json';
 import TokenFarm from '../abis/TokenFarm.json';
 import BVideo from '../abis/BVideo.json';
+import dai from '../dai.png'
 import './App.css';
 
 
@@ -46,7 +47,7 @@ class App extends Component {
     const tokenFarmData = await TokenFarm.networks[networkId];
     const bVideoData = await BVideo.networks[networkId];
     
-
+debugger;
     if(bVideoData){
       const bVideo = new web3.eth.Contract(BVideo.abi, bVideoData.address);
       this.setState({ bVideo });
@@ -54,15 +55,16 @@ class App extends Component {
       let vCount = await bVideo.methods.vCount().call();
       this.setState({ vCount });
 
-      for(var i=vCount-1; i>=1; i--){
-        let video = await bVideo.methods.videos(i).call();
+      for(var i=vCount; i>=1; i--){
+        let video = await bVideo.methods.videos(i-1).call();
         this.setState({ videos: [...this.state.videos, video]})
       }
 
       console.log("vCOUNT: ", this.state.vCount);
       console.log("VIDEOS: ", this.state.videos);      
 
-      let latest = await bVideo.methods.videos((vCount-1)).call();
+
+      let latest = await bVideo.methods.videos((vCount)).call();
 
       console.log("LATEST: ", latest);
       let latestHash = latest.videoHash;
@@ -207,7 +209,7 @@ class App extends Component {
 
   submitToIPFS = title => {
     console.log("Submitting to IPFS: ", title)
-
+debugger;
     this.setState({ loading: true})
     ipfs.add(this.state.buffer, (error, result) => {
       console.log("Result: ", result);
@@ -215,7 +217,6 @@ class App extends Component {
         console.error(error);
         return;
       }
-
       this.state.bVideo.methods.videoUpload(result[0].hash, title).send({ from: this.state.acc }).on("transactionHash", (hash) => {
         this.setState({ loading: false }) 
       })
@@ -240,25 +241,30 @@ class App extends Component {
     return (
       <div className="container">
 
-      <div class="container-fluid text-monospace">
+      <div className="container-fluid text-monospace">
       <br/><br/>
       &nbsp;
       <br/><br/>
         <div className="row">
           <div className="col-md-10">
-            <div className="embed-responsive embed-responsive-16by9" style={{ maxHeight: '768px' }}>
+            <div className="embed-responsive embed-responsive-16by9" style={{ maxHeight: '768px', minHeight: '768px' }}>
               <p>{this.state.latestHash}</p>
+            
               <video
                 src={'https://ipfs.infura.io/ipfs/'+this.state.latestHash}
+                style={{width: '850px'}}
+                
                 controls
+
               >
               </video>
+              <h3><b><i>{this.state.latestTitle}</i></b></h3>
             </div>
-            <h3><b><i>{this.state.latestTitle}</i></b></h3>
+          
           </div>
           <div className="col-md-2">
 
-          <h1>IPFS File Submission...</h1>
+          <h3><i>IPFS File Submission...</i></h3>
             <form onSubmit={(event)=>{
               event.preventDefault();
               const title = this.videoTitle.value;
@@ -268,7 +274,8 @@ class App extends Component {
                 type="file"
                 accept=".mp4, .mkv .ogg .wmv"
                 onChange={this.captureFile}
-                style={{width: '250px'}}
+                className="btn btn-success"
+                style={{width: '250px', margin: '0px 0px 10px 0px', backgroundColor: '#753a88'}}
                 />
               
               <input 
@@ -279,9 +286,9 @@ class App extends Component {
                 placeholder="Title"
                 required
                 />
-              <button type="submit" className="btn btn-success">Submit To IPFS</button>
+              <button style={{margin: '10px 10px 10px 0px', backgroundColor: '#753a88'}} type="submit" className="btn btn-success">Submit To IPFS</button>
             </form> 
-
+            <div style={{ overflow:'scroll', height:'600px', width: '200px'}}>
             {this.state.videos.map((video, key)=>{
               return(
                 <div className="card mb-4 text-center bg-secondory mx-auto" style={{ width: '175px'}}>
@@ -301,39 +308,70 @@ class App extends Component {
                 </div>
               )
             })}
+            </div>
           </div>
         </div>
 
       </div>
 
+<br/>
+<hr/>
+<br/>
+<h1 ><i><b>Liquidity Pool</b></i></h1>
+<br/>
+<hr/>
+<br/>
+
+<div id="content" className="mt-3">
+	     	<table style={{ color: 'white'}} className="table table-borderless text-center">
+	     		<thead>
+	     			<tr>
+	     				<th scope="col">Stacking Balance</th>
+	     				<th scope="col">Reward Balance</th>
+	     			</tr>
+	     		</thead>
+	     		<tbody>
+	     			<tr>
+            	<td>{window.web3.utils.fromWei(this.state.daiTokenBal, 'Ether')} Dai</td>
+	     				<td>{window.web3.utils.fromWei(this.state.dappTokenBal, 'Ether')} DAPP</td>
+	     			</tr>
+	     		</tbody>
+	     	</table>
+
+	     	<div className="card mb-4">
+	     		<div className="card-body">
+	     			<form className="mb-3" onSubmit={(event) => {
+	     				event.preventDefault()
+	     				let amount
+	     				amount = this.input.value.toString()
+	     				amount = window.web3.utils.toWei(amount, 'Ether')
+	     				this.props.stakeTokens(amount)
+	     			}}>
 
 
-
-
-
-        <h1>Liquidity Pool!!!</h1>
-        <p>{this.state.acc}</p>
-
-        <form onSubmit={(event) => {
-          event.preventDefault()
-          let amount = this.input.value.toString()
-          amount = window.web3.utils.toWei(amount, 'Ether')
-          this.stackAmount(amount)
-        }}>
-           <p>Dai:       {window.web3.utils.fromWei(this.state.daiTokenBal, 'Ether')}</p>
-           <p>Dapp:      {window.web3.utils.fromWei(this.state.dappTokenBal, 'Ether')}</p>
-           <p>TokenFarm: {window.web3.utils.fromWei(this.state.tokenFarmBal, 'Ether')}</p>
-          
-           <input
+	     				<div>
+	     					<label className="float-left"><b>Stake Tokens</b></label>
+	     					<span className="float-right" >
+	     						Balance: {window.web3.utils.fromWei(this.state.daiTokenBal, 'Ether')}
+	     					</span>
+	     				</div>
+	     				<div className="input-group mb-4">
+	     					<input
 	     						type="text"
 	     						ref={(input) => { this.input = input }}
 	     						className="form-control form-control-lg"
 	     						placeholder="0"
 	     						required />
-          
-          <button type="submit">Stake!</button>
-        </form>
-        <button
+	     					<div className="input-group-append">
+	     						<div className="input-group-text">
+	     							<img src={dai} height='32' alt=""/>
+	     							&nbsp;&nbsp;&nbsp; DAI
+	     						</div>
+	     					</div>
+	     				</div>
+	     				<button type="submit" className="btn btn-primary btn-block btn-lg">STAKE!</button>
+	     			</form>
+	     			<button
 	     				type="submit"
 	     				className="btn btn-link btn-block btn-sm"
 	     				onClick={(event) => {
@@ -342,6 +380,9 @@ class App extends Component {
 	     				}}>
 	     					UN-STAKE...
 	     			</button>
+	     		</div>
+	     	</div>
+	     </div>
       </div>
     );
   }
